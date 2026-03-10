@@ -3,11 +3,12 @@ import css from "./MovieCard.module.css";
 
 interface MovieCardProps {
   movie: Movie;
+  onSelect: (movie: Movie) => void;
 }
 
 const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
-export default function MovieCard({ movie }: MovieCardProps) {
+export default function MovieCard({ movie, onSelect }: MovieCardProps) {
   const posterUrl = movie.poster_path
     ? `${POSTER_BASE_URL}${movie.poster_path}`
     : "https://placehold.co/500x750?text=No+Image";
@@ -22,6 +23,13 @@ export default function MovieCard({ movie }: MovieCardProps) {
           {movie.vote_average.toFixed(1)}
         </p>
         <p className={css.text}>{movie.overview || "No overview available."}</p>
+        <button
+          className={css.button}
+          type="button"
+          onClick={() => onSelect(movie)}
+        >
+          Learn more
+        </button>
       </div>
     </article>
   );

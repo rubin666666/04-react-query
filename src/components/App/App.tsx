@@ -1,11 +1,13 @@
-﻿import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import ReactPaginate from "react-paginate";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Loader from "../Loader/Loader";
 import MovieGrid from "../MovieGrid/MovieGrid";
+import MovieModal from "../MovieModal/MovieModal";
 import SearchBar from "../SearchBar/SearchBar";
 import { fetchMovies } from "../../services/tmdbApi";
+import type { Movie } from "../../types/movie";
 import css from "./App.module.css";
 
 interface PageChangeEvent {
@@ -15,6 +17,7 @@ interface PageChangeEvent {
 export default function App() {
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   const { data, isError, error, isFetching } = useQuery({
     queryKey: ["movies", submittedQuery, page],
@@ -26,6 +29,7 @@ export default function App() {
   const handleSearch = (nextQuery: string) => {
     setSubmittedQuery(nextQuery);
     setPage(1);
+    setSelectedMovie(null);
   };
 
   const totalPages = data?.total_pages ?? 0;
@@ -47,7 +51,9 @@ export default function App() {
           <p className={css.status}>No movies found for your request.</p>
         )}
 
-        {movies.length > 0 && <MovieGrid movies={movies} />}
+        {movies.length > 0 && (
+          <MovieGrid movies={movies} onSelect={setSelectedMovie} />
+        )}
 
         {totalPages > 1 && (
           <ReactPaginate
@@ -60,8 +66,15 @@ export default function App() {
             forcePage={page - 1}
             containerClassName={css.pagination}
             activeClassName={css.active}
-            nextLabel="→"
-            previousLabel="←"
+            nextLabel=">"
+            previousLabel="<"
+          />
+        )}
+
+        {selectedMovie && (
+          <MovieModal
+            movie={selectedMovie}
+            onClose={() => setSelectedMovie(null)}
           />
         )}
       </div>
