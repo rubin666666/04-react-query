@@ -1,4 +1,4 @@
-import {
+﻿import {
   useEffect,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent,
@@ -12,20 +12,25 @@ interface MovieModalProps {
   onClose: () => void;
 }
 
+const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
 const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const modalRoot = document.body;
 
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
       }
     };
 
+    document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleEscape);
 
     return () => {
+      document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleEscape);
     };
   }, [onClose]);
@@ -44,9 +49,11 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
     }
   };
 
-  const posterUrl = movie.poster_path
-    ? `${POSTER_BASE_URL}${movie.poster_path}`
-    : "https://placehold.co/500x750?text=No+Image";
+  const imageUrl = movie.backdrop_path
+    ? `${IMAGE_BASE_URL}${movie.backdrop_path}`
+    : movie.poster_path
+      ? `${POSTER_BASE_URL}${movie.poster_path}`
+      : "https://placehold.co/1200x675?text=No+Image";
 
   return createPortal(
     <div className={css.backdrop} onClick={handleBackdropClick}>
@@ -58,9 +65,9 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
           onKeyDown={handleCloseButtonKeyDown}
           aria-label="Close modal"
         >
-          ?
+          ×
         </button>
-        <img className={css.poster} src={posterUrl} alt={movie.title} />
+        <img className={css.poster} src={imageUrl} alt={movie.title} />
         <div className={css.content}>
           <h2 className={css.title}>{movie.title}</h2>
           <p className={css.meta}>

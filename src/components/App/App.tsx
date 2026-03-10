@@ -1,5 +1,6 @@
 ﻿import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import ReactPaginate from "react-paginate";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import Loader from "../Loader/Loader";
@@ -26,6 +27,20 @@ export default function App() {
     placeholderData: keepPreviousData,
   });
 
+  useEffect(() => {
+    if (
+      !submittedQuery ||
+      isFetching ||
+      isError ||
+      !data ||
+      data.results.length > 0
+    ) {
+      return;
+    }
+
+    toast("No movies found for your request.");
+  }, [data, isError, isFetching, submittedQuery]);
+
   const handleSearch = (nextQuery: string) => {
     setSubmittedQuery(nextQuery);
     setPage(1);
@@ -47,10 +62,6 @@ export default function App() {
           <ErrorMessage message={error.message || "Something went wrong."} />
         )}
 
-        {!isError && submittedQuery && !isFetching && movies.length === 0 && (
-          <p className={css.status}>No movies found for your request.</p>
-        )}
-
         {movies.length > 0 && (
           <MovieGrid movies={movies} onSelect={setSelectedMovie} />
         )}
@@ -66,8 +77,8 @@ export default function App() {
             forcePage={page - 1}
             containerClassName={css.pagination}
             activeClassName={css.active}
-            nextLabel=">"
-            previousLabel="<"
+            nextLabel="→"
+            previousLabel="←"
           />
         )}
 
